@@ -2,12 +2,10 @@ package org.example.api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.api.model.User;
 import org.example.api.model.UserDTO;
 import org.example.api.payload.request.UpdateProfileRequest;
-import org.example.api.payload.request.ChangePasswordRequest;
+import org.example.api.payload.request.auth.ChangePasswordRequest;
 import org.example.api.payload.response.DefaultResponse;
-import org.example.api.payload.response.MessageResponse;
 import org.example.api.repository.UserRepository;
 import org.example.api.security.services.UserDetailsImpl;
 import org.example.api.service.UserService;

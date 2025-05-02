@@ -1,4 +1,4 @@
-package org.example.api.payload.request;
+package org.example.api.payload.request.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
