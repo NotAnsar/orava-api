@@ -2,7 +2,7 @@ package org.example.api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.api.model.Category;
-import org.example.api.model.CategoryDTO;
+import org.example.api.dto.CategoryDTO;
 import org.example.api.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 

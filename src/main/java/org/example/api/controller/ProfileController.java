@@ -2,11 +2,10 @@ package org.example.api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.api.model.UserDTO;
+import org.example.api.dto.UserDTO;
 import org.example.api.payload.request.UpdateProfileRequest;
 import org.example.api.payload.request.auth.ChangePasswordRequest;
 import org.example.api.payload.response.DefaultResponse;
-import org.example.api.repository.UserRepository;
 import org.example.api.security.services.UserDetailsImpl;
 import org.example.api.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -26,8 +24,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProfileController {
     private final UserService userService;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     /**
      * Get the current user's profile information

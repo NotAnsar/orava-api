@@ -2,7 +2,7 @@ package org.example.api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.api.model.User;
-import org.example.api.model.UserDTO;
+import org.example.api.dto.UserDTO;
 import org.example.api.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

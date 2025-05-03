@@ -2,7 +2,7 @@ package org.example.api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.api.model.Size;
-import org.example.api.model.SizeDTO;
+import org.example.api.dto.SizeDTO;
 import org.example.api.repository.SizeRepository;
 import org.springframework.stereotype.Service;
 

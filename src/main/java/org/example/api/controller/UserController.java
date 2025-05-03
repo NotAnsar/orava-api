@@ -2,7 +2,7 @@ package org.example.api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.api.model.UserDTO;
+import org.example.api.dto.UserDTO;
 import org.example.api.model.UserRole;
 import org.example.api.payload.request.user.CreateUserRequest;
 import org.example.api.payload.request.user.UpdateUserRequest;

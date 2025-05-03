@@ -2,7 +2,7 @@ package org.example.api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.api.model.Color;
-import org.example.api.model.ColorDTO;
+import org.example.api.dto.ColorDTO;
 import org.example.api.repository.ColorRepository;
 import org.springframework.stereotype.Service;
 

@@ -2,7 +2,7 @@ package org.example.api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.api.model.ColorDTO;
+import org.example.api.dto.ColorDTO;
 import org.example.api.payload.request.color.CreateColorRequest;
 import org.example.api.payload.request.color.UpdateColorRequest;
 import org.example.api.payload.response.DefaultResponse;

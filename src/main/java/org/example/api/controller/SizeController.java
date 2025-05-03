@@ -2,7 +2,7 @@ package org.example.api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.api.model.SizeDTO;
+import org.example.api.dto.SizeDTO;
 import org.example.api.payload.request.size.CreateSizeRequest;
 import org.example.api.payload.request.size.UpdateSizeRequest;
 import org.example.api.payload.response.DefaultResponse;

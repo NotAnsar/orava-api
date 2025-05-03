@@ -2,7 +2,7 @@ package org.example.api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.api.model.UserDTO;
+import org.example.api.dto.UserDTO;
 import org.example.api.model.UserRole;
 import org.example.api.payload.request.auth.LoginRequest;
 import org.example.api.payload.request.auth.RegisterRequest;
@@ -10,7 +10,6 @@ import org.example.api.payload.response.AuthResponse;
 import org.example.api.repository.UserRepository;
 import org.example.api.security.jwt.JwtUtils;
 import org.example.api.security.services.UserDetailsImpl;
-import org.example.api.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,7 +29,6 @@ import java.time.ZonedDateTime;
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
-    private final UserService userService;
     private final JwtUtils jwtUtils;
 
     @PostMapping("/login")
@@ -98,8 +96,6 @@ public class AuthController {
         userDTO.setPassword(registerRequest.getPassword());
         userDTO.setCreatedAt(ZonedDateTime.now());
         userDTO.setRole(UserRole.USER);
-
-        UserDTO savedUser = userService.createUser(userDTO);
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

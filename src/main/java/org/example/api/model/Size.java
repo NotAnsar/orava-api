@@ -2,7 +2,6 @@ package org.example.api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.example.api.model.Product;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.ZonedDateTime;

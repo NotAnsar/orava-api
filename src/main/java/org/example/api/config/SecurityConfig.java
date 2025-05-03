@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.api.security.jwt.AuthEntryPointJwt;
 import org.example.api.security.jwt.AuthTokenFilter;
 import org.example.api.security.jwt.JwtUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -60,10 +59,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Make GET endpoints for categories, colors, and sizes public
+                        // Make GET endpoints for categories, colors, sizes and product public
                         .requestMatchers(HttpMethod.GET, "/api/colors/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/sizes/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .anyRequest().authenticated()
                 );
 

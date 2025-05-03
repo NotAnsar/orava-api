@@ -2,7 +2,7 @@ package org.example.api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.api.model.CategoryDTO;
+import org.example.api.dto.CategoryDTO;
 import org.example.api.payload.request.category.CreateCategoryRequest;
 import org.example.api.payload.request.category.UpdateCategoryRequest;
 import org.example.api.payload.response.DefaultResponse;

@@ -1,8 +1,10 @@
-package org.example.api.model;
+package org.example.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.api.model.User;
+import org.example.api.model.UserRole;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
