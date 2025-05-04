@@ -10,7 +10,9 @@ import org.example.api.repository.SizeRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -129,13 +131,44 @@ public class ProductService {
         return ProductDTO.fromEntity(savedProduct);
     }
 
-    public boolean deleteProduct(UUID id) {
-        if (!productRepository.existsById(id)) {
-            return false;
+    public Map<String, Object> deleteProduct(UUID id) {
+        Map<String, Object> result = new HashMap<>();
+        
+        Optional<Product> productOpt = productRepository.findById(id);
+        if (productOpt.isEmpty()) {
+            result.put("success", false);
+            result.put("message", "Product not found");
+            return result;
         }
 
+        Product product = productOpt.get();
+
+        // Check if product has associated order items
+        if (product.getOrderItems() != null && !product.getOrderItems().isEmpty()) {
+            result.put("success", false);
+            result.put("message", "The product is associated with existing orders and cannot be deleted");
+            return result;
+        }
+
+        // If no associations, delete the product
         productRepository.deleteById(id);
-        return true;
+        result.put("success", true);
+        result.put("message", "Product deleted successfully");
+        return result;
+    }
+
+    public ProductDTO archiveProduct(UUID id) {
+        Optional<Product> productOpt = productRepository.findById(id);
+
+        if (productOpt.isEmpty()) {
+            throw new RuntimeException("Product not found");
+        }
+
+        Product product = productOpt.get();
+        product.setArchived(true);
+
+        Product savedProduct = productRepository.save(product);
+        return ProductDTO.fromEntity(savedProduct);
     }
 
     public List<ProductDTO> findByCategoryId(UUID categoryId) {
@@ -173,5 +206,25 @@ public class ProductService {
         return productRepository.searchProducts(name, categoryId, colorId, sizeId, archived, featured).stream()
                 .map(ProductDTO::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Toggle a product's archive status
+     * If currently archived -> restore (unarchive)
+     * If currently active -> archive
+     */
+    public ProductDTO toggleArchiveStatus(UUID id) {
+        Optional<Product> productOpt = productRepository.findById(id);
+
+        if (productOpt.isEmpty()) {
+            throw new RuntimeException("Product not found");
+        }
+
+        Product product = productOpt.get();
+        // Toggle the archived status (true becomes false, false becomes true)
+        product.setArchived(!product.getArchived());
+
+        Product savedProduct = productRepository.save(product);
+        return ProductDTO.fromEntity(savedProduct);
     }
 }

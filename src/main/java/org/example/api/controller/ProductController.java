@@ -13,9 +13,11 @@ import org.example.api.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,15 +35,30 @@ public class ProductController {
             @RequestParam(required = false) UUID colorId,
             @RequestParam(required = false) UUID sizeId,
             @RequestParam(required = false) Boolean archived,
-            @RequestParam(required = false) Boolean featured) {
+            @RequestParam(required = false) Boolean featured,
+            Authentication authentication) {
 
-        // If no filters, return all products
+        // Check if user is admin
+        boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+
+        // If user is not admin, force archived=false
+        if (!isAdmin && archived == null) {
+            archived = false;
+        }
+
+        // Process query with filters
         List<ProductDTO> products;
         if (name != null || categoryId != null || colorId != null || sizeId != null ||
-                archived != null || featured != null) {
+                featured != null || archived != null) {
             products = productService.searchProducts(name, categoryId, colorId, sizeId, archived, featured);
         } else {
-            products = productService.getAllProducts();
+            // No filters provided
+            if (isAdmin) {
+                products = productService.getAllProducts();
+            } else {
+                products = productService.getActiveProducts(); // Non-archived products only
+            }
         }
 
         return ResponseEntity.ok(
@@ -207,15 +224,53 @@ public class ProductController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<DefaultResponse<Void>> deleteProduct(@PathVariable UUID id) {
-        boolean deleted = productService.deleteProduct(id);
+        Map<String, Object> result = productService.deleteProduct(id);
 
-        if (deleted) {
+        boolean success = (boolean) result.get("success");
+        String message = (String) result.get("message");
+
+        if (success) {
             return ResponseEntity.ok(
-                    new DefaultResponse<>("Product deleted successfully", true, null)
+                    new DefaultResponse<>(message, true, null)
             );
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new DefaultResponse<>("Product not found", false, null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new DefaultResponse<>(message, false, null));
         }
     }
+
+    @PatchMapping("/{id}/archive")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<DefaultResponse<ProductDTO>> archiveProduct(@PathVariable UUID id) {
+        try {
+            ProductDTO archivedProduct = productService.archiveProduct(id);
+            return ResponseEntity.ok(
+                    new DefaultResponse<>("Product archived successfully", true, archivedProduct)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new DefaultResponse<>(e.getMessage(), false, null));
+        }
+    }
+
+    @PatchMapping("/{id}/toggle-archive")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<DefaultResponse<ProductDTO>> toggleArchiveProduct(@PathVariable UUID id) {
+        try {
+            ProductDTO product = productService.toggleArchiveStatus(id);
+
+            // Create response message based on the updated archived status
+            String message = product.getArchived()
+                    ? "Product archived successfully"
+                    : "Product restored successfully";
+
+            return ResponseEntity.ok(
+                    new DefaultResponse<>(message, true, product)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new DefaultResponse<>(e.getMessage(), false, null));
+        }
+    }
+
 }
