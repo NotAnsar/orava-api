@@ -4,12 +4,17 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.api.dto.UserDTO;
 import org.example.api.model.UserRole;
+import org.example.api.payload.request.auth.ForgotPasswordRequest;
 import org.example.api.payload.request.auth.LoginRequest;
 import org.example.api.payload.request.auth.RegisterRequest;
+import org.example.api.payload.request.auth.ResetPasswordRequest;
 import org.example.api.payload.response.AuthResponse;
 import org.example.api.repository.UserRepository;
 import org.example.api.security.jwt.JwtUtils;
 import org.example.api.security.services.UserDetailsImpl;
+import org.example.api.service.EmailService;
+import org.example.api.service.PasswordResetService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,6 +35,11 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
+    @Autowired
+    private PasswordResetService passwordResetService;
+
+    @Autowired
+    private EmailService emailService;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -119,5 +129,57 @@ public class AuthController {
                 ),
                 jwt
         ));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String token = passwordResetService.createPasswordResetTokenForUser(request.getEmail());
+
+        if (token == null) {
+            // We don't want to reveal whether the email exists in the system
+            // So we return a success message anyway
+            return ResponseEntity.ok(new AuthResponse(
+                    "If your email exists in our system, you will receive a password reset link shortly.",
+                    null, null, true));
+        }
+
+        // Send the email with the reset link
+        boolean emailSent = emailService.sendPasswordResetEmail(request.getEmail(), token);
+
+        if (!emailSent) {
+            System.out.println("Could not send password reset email to {}");
+            System.out.println(request.getEmail());
+            // For development purposes, return the token directly
+            return ResponseEntity.ok(new AuthResponse(
+                    "Email service is not working, use this token to reset: " + token,
+                    null, token, true));
+        }
+
+        return ResponseEntity.ok(new AuthResponse(
+                "Password reset link sent to your email.",
+                null, null, true));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        // First validate the token
+        if (!passwordResetService.validatePasswordResetToken(request.getToken())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new AuthResponse("Invalid or expired password reset token", null, null, false));
+        }
+
+        // Then reset the password
+        boolean result = passwordResetService.resetPassword(request.getToken(), request.getPassword());
+
+        if (result) {
+            return ResponseEntity.ok(new AuthResponse(
+                    "Password has been reset successfully. You can now login with your new password.",
+                    null, null, true));
+        } else {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new AuthResponse("Failed to reset password", null, null, false));
+        }
     }
 }
