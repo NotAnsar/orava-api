@@ -69,10 +69,10 @@ public class UserDetailsImpl implements UserDetails {
                 authorities);
     }
 
-    @Override
+    /*@Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
-    }
+    }*/
 
     @Override
     public String getPassword() {
@@ -121,5 +121,11 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 }

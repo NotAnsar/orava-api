@@ -29,7 +29,7 @@ public class UserController {
      * Get all users - admin only
      */
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'GUEST')")
     public ResponseEntity<DefaultResponse<List<UserDTO>>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(

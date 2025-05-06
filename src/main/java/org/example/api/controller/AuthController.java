@@ -3,6 +3,7 @@ package org.example.api.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.api.dto.UserDTO;
+import org.example.api.model.User;
 import org.example.api.model.UserRole;
 import org.example.api.payload.request.auth.ForgotPasswordRequest;
 import org.example.api.payload.request.auth.LoginRequest;
@@ -23,6 +24,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
@@ -40,6 +42,8 @@ public class AuthController {
 
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -129,6 +133,55 @@ public class AuthController {
                 ),
                 jwt
         ));
+    }
+
+    @PostMapping("/guest-login")
+    public ResponseEntity<?> guestLogin() {
+        // Guest credentials - in production, consider using environment variables
+        String guestEmail = "guest@example.com";
+        String guestPassword = "guest123"; // This is just for demo purposes
+
+        try {
+            // Check if guest user exists, if not create it
+            if (!userRepository.existsByEmail(guestEmail)) {
+                User guestUser = new User();
+                guestUser.setFirstName("Guest");
+                guestUser.setLastName("User");
+                guestUser.setEmail(guestEmail);
+                guestUser.setPassword(passwordEncoder.encode(guestPassword));
+                guestUser.setRole(UserRole.GUEST);
+                guestUser.setCreatedAt(ZonedDateTime.now());
+                userRepository.save(guestUser);
+            }
+
+            // Authenticate with guest credentials
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(guestEmail, guestPassword));
+
+            // Set authentication and generate JWT
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+            return ResponseEntity.ok(new AuthResponse(
+                    "Guest access granted",
+                    new AuthResponse.UserData(
+                            userDetails.getId(),
+                            userDetails.getFirstName(),
+                            userDetails.getLastName(),
+                            userDetails.getUsername(),
+                            userDetails.getRole(),
+                            userDetails.getCreatedAt()
+                    ),
+                    jwt,
+                    true
+            ));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(new AuthResponse("Error: Failed to authenticate guest", null, null, false));
+        }
     }
 
     @PostMapping("/forgot-password")

@@ -29,7 +29,7 @@ public class OrderController {
      * Get all orders - admin only
      */
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'GUEST')")
     public ResponseEntity<DefaultResponse<List<OrderDTO>>> getAllOrders(
             @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) OrderStatus status,
@@ -53,7 +53,7 @@ public class OrderController {
      * Get order by ID
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or @userSecurity.isOrderOwner(authentication, #id)")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'GUEST') or @userSecurity.isOrderOwner(authentication, #id)")
     public ResponseEntity<DefaultResponse<OrderDTO>> getOrderById(@PathVariable UUID id) {
         Optional<OrderDTO> orderOpt = orderService.getOrderById(id);
 

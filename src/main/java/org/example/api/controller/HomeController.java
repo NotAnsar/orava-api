@@ -25,7 +25,7 @@ public class HomeController {
      * - Total Sales (orders)
      */
     @GetMapping("/summary")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'GUEST')")
     public ResponseEntity<DefaultResponse<DashboardSummaryDTO>> getDashboardSummary() {
         DashboardSummaryDTO summary = homeService.getDashboardSummary();
         return ResponseEntity.ok(
@@ -37,7 +37,7 @@ public class HomeController {
      * Get monthly revenue for the last 6 months
      */
     @GetMapping("/revenue")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'GUEST')")
     public ResponseEntity<DefaultResponse<List<MonthlyRevenueDTO>>> getMonthlyRevenue() {
         List<MonthlyRevenueDTO> revenue = homeService.getMonthlyRevenue();
         return ResponseEntity.ok(
@@ -49,7 +49,7 @@ public class HomeController {
      * Get recent orders (latest 10)
      */
     @GetMapping("/recent-orders")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'GUEST')")
     public ResponseEntity<DefaultResponse<List<RecentOrderDTO>>> getRecentOrders() {
         List<RecentOrderDTO> orders = homeService.getRecentOrders();
         return ResponseEntity.ok(
@@ -61,7 +61,7 @@ public class HomeController {
      * Get products with low stock (inventory alert)
      */
     @GetMapping("/inventory-alert")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'GUEST')")
     public ResponseEntity<DefaultResponse<List<InventoryAlertDTO>>> getInventoryAlert() {
         List<InventoryAlertDTO> alerts = homeService.getInventoryAlert();
         return ResponseEntity.ok(
@@ -73,7 +73,7 @@ public class HomeController {
      * Get sales performance by category
      */
     @GetMapping("/category-performance")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'GUEST')")
     public ResponseEntity<DefaultResponse<List<CategorySalesDTO>>> getCategorySalesPerformance() {
         List<CategorySalesDTO> performance = homeService.getCategorySalesPerformance();
         return ResponseEntity.ok(
