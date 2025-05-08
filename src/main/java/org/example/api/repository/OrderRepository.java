@@ -20,6 +20,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     // Find orders within a date range
     List<Order> findByCreatedAtBetween(ZonedDateTime start, ZonedDateTime end);
 
+    // Find orders created after a specific date
+    List<Order> findByCreatedAtAfter(ZonedDateTime date);
+
     // Get recent orders - used by HomeService for dashboard
     List<Order> findTop10ByOrderByCreatedAtDesc();
 
