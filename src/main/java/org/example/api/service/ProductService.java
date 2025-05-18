@@ -24,6 +24,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ColorRepository colorRepository;
     private final SizeRepository sizeRepository;
+    private final S3Service s3Service;
 
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll().stream()
@@ -148,6 +149,19 @@ public class ProductService {
             result.put("success", false);
             result.put("message", "The product is associated with existing orders and cannot be deleted");
             return result;
+        }
+
+        // Delete all associated images from S3 before deleting the product
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            for (ProductImage image : product.getImages()) {
+                try {
+                    // Delete from S3 using the stored key
+                    s3Service.deleteFile(image.getKey());
+                } catch (Exception e) {
+                    // Log error but continue with deletion
+                    System.err.println("Failed to delete image file from S3: " + e.getMessage());
+                }
+            }
         }
 
         // If no associations, delete the product

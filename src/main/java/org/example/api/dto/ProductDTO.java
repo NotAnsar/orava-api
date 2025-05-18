@@ -7,7 +7,9 @@ import org.example.api.model.Product;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -24,38 +26,33 @@ public class ProductDTO {
     private Boolean featured;
     private ColorDTO color;
     private SizeDTO size;
+    private List<ProductImageDTO> images;
 
     public static ProductDTO fromEntity(Product product) {
-        // Create nested CategoryDTO with createdAt
+        if (product == null) {
+            return null;
+        }
+
         CategoryDTO categoryDTO = null;
         if (product.getCategory() != null) {
-            categoryDTO = new CategoryDTO(
-                    product.getCategory().getId(),
-                    product.getCategory().getName(),
-                    product.getCategory().getCreatedAt() // Include createdAt
-            );
+            categoryDTO = CategoryDTO.fromEntity(product.getCategory());
         }
 
-        // Create nested ColorDTO with createdAt
         ColorDTO colorDTO = null;
         if (product.getColor() != null) {
-            colorDTO = new ColorDTO(
-                    product.getColor().getId(),
-                    product.getColor().getName(),
-                    product.getColor().getValue(),
-                    product.getColor().getCreatedAt() // Include createdAt
-            );
+            colorDTO = ColorDTO.fromEntity(product.getColor());
         }
 
-        // Create nested SizeDTO with createdAt
         SizeDTO sizeDTO = null;
         if (product.getSize() != null) {
-            sizeDTO = new SizeDTO(
-                    product.getSize().getId(),
-                    product.getSize().getName(),
-                    product.getSize().getFullname(),
-                    product.getSize().getCreatedAt() // Include createdAt
-            );
+            sizeDTO = SizeDTO.fromEntity(product.getSize());
+        }
+
+        List<ProductImageDTO> imageList = null;
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            imageList = product.getImages().stream()
+                    .map(ProductImageDTO::fromEntity)
+                    .collect(Collectors.toList());
         }
 
         return new ProductDTO(
@@ -69,7 +66,18 @@ public class ProductDTO {
                 product.getArchived(),
                 product.getFeatured(),
                 colorDTO,
-                sizeDTO
+                sizeDTO,
+                imageList
         );
+    }
+
+    // Method to convert a list of Product entities to DTOs
+    public static List<ProductDTO> fromEntities(List<Product> products) {
+        if (products == null) {
+            return null;
+        }
+        return products.stream()
+                .map(ProductDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 }

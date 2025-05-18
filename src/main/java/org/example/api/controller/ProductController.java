@@ -2,24 +2,27 @@ package org.example.api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.api.dto.CategoryDTO;
-import org.example.api.dto.ColorDTO;
-import org.example.api.dto.ProductDTO;
-import org.example.api.dto.SizeDTO;
+import org.example.api.dto.*;
+import org.example.api.model.ProductImage;
 import org.example.api.payload.request.product.CreateProductRequest;
 import org.example.api.payload.request.product.UpdateProductRequest;
 import org.example.api.payload.response.DefaultResponse;
+import org.example.api.repository.ProductRepository;
+import org.example.api.service.ProductImageService;
 import org.example.api.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -27,6 +30,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
+    private final ProductImageService productImageService;
+    private final ProductRepository productRepository;
 
     @GetMapping
     public ResponseEntity<DefaultResponse<List<ProductDTO>>> getAllProducts(
@@ -270,6 +275,70 @@ public class ProductController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new DefaultResponse<>(e.getMessage(), false, null));
+        }
+    }
+
+
+
+    @PostMapping("/{id}/images")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> uploadProductImages(
+            @PathVariable UUID id,
+            @RequestParam("files") List<MultipartFile> files) {
+
+        try {
+            // Check if product exists
+            if (!productRepository.existsById(id)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new DefaultResponse<>("Product not found", false, null));
+            }
+
+            // Upload images
+            List<ProductImage> images = productImageService.addImagesToProduct(id, files);
+
+            // Convert to DTOs
+            List<ProductImageDTO> imageDTOs = images.stream()
+                    .map(ProductImageDTO::fromEntity)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(
+                    new DefaultResponse<>("Images uploaded successfully", true, imageDTOs)
+            );
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new DefaultResponse<>("Failed to upload images: " + e.getMessage(), false, null));
+        }
+    }
+
+    @DeleteMapping("/images/{imageId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> deleteProductImage(@PathVariable UUID imageId) {
+        try {
+            productImageService.deleteImage(imageId);
+            return ResponseEntity.ok(
+                    new DefaultResponse<>("Image deleted successfully", true, null)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new DefaultResponse<>("Failed to delete image: " + e.getMessage(), false, null));
+        }
+    }
+
+    @GetMapping("/{id}/images")
+    public ResponseEntity<?> getProductImages(@PathVariable UUID id) {
+        try {
+            List<ProductImage> images = productImageService.getProductImages(id);
+
+            List<ProductImageDTO> imageDTOs = images.stream()
+                    .map(ProductImageDTO::fromEntity)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(
+                    new DefaultResponse<>("Images retrieved successfully", true, imageDTOs)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new DefaultResponse<>("Failed to retrieve images: " + e.getMessage(), false, null));
         }
     }
 
