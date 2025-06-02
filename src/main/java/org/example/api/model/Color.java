@@ -28,4 +28,9 @@ public class Color {
 
     @OneToMany(mappedBy = "color")
     private List<Product> products;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = ZonedDateTime.now();
+    }
 }

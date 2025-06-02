@@ -39,4 +39,8 @@ public class Task {
     public enum TaskPriority {
         LOW, MEDIUM, HIGH
     }
+    @PrePersist
+    protected void onCreate() {
+        createdAt = ZonedDateTime.now();
+    }
 }

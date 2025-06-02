@@ -33,7 +33,7 @@ import java.time.ZonedDateTime;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class  AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;

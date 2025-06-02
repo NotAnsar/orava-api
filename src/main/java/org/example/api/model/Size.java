@@ -30,4 +30,9 @@ public class Size {
 
     @OneToMany(mappedBy = "size")
     private List<Product> products;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = ZonedDateTime.now();
+    }
 }

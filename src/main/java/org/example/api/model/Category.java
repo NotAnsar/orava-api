@@ -26,4 +26,9 @@ public class Category {
 
     @OneToMany(mappedBy = "category")
     private List<Product> products;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = ZonedDateTime.now();
+    }
 }

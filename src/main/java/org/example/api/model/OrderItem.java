@@ -35,4 +35,9 @@ public class OrderItem {
 
     @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = ZonedDateTime.now();
+    }
 }

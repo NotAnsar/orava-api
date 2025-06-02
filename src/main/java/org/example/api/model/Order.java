@@ -40,4 +40,8 @@ public class Order {
     public enum OrderStatus {
         NEW, PROCESSING, COMPLETED, CANCELED
     }
+    @PrePersist
+    protected void onCreate() {
+        createdAt = ZonedDateTime.now();
+    }
 }

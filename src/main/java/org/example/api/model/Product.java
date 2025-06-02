@@ -75,4 +75,9 @@ public class Product {
             image.setProduct(null);
         }
     }
+    @PrePersist
+    protected void onCreate() {
+        createdAt = ZonedDateTime.now();
+    }
+
 }
